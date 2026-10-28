@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse the complete A1–B2 grammar syllabus from the Chinese Grammar Wiki. Read each pattern and example in clear, large Hanzi.">
+  <meta name="theme-color" content="#ffffff">
+  <title>A1–B2 Grammar Points · Chinese Grammar</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-name" href="#/">Chinese Grammar <span>A1–B2</span></a>
+      <div class="header-right">
+        <span class="header-progress" id="headerProgress" aria-live="polite">0 of 434 learned</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section id="browseView">
+      <header class="page-heading">
+        <h1 id="browseTitle">A1–B2 grammar points</h1>
+        <p>Browse the complete A1–B2 grammar syllabus from the Chinese Grammar Wiki. Select a point to read its pattern, explanation, and examples.</p>
+      </header>
+
+      <div class="browse-layout">
+        <aside class="filters" aria-label="Browse filters">
+          <div class="search-group">
+            <label for="searchInput">Search</label>
+            <div class="search-field">
+              <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m20 20-3.2-3.2"></path>
+              </svg>
+              <input type="search" id="searchInput" placeholder="Search points" autocomplete="off">
+              <button class="clear-search" id="clearSearchButton" type="button" aria-label="Clear search" hidden>×</button>
+            </div>
+          </div>
+
+          <p class="filter-label" id="levelsLabel">Level</p>
+          <nav class="level-nav" id="levelNav" aria-labelledby="levelsLabel"></nav>
+
+          <p class="filter-label" id="categoriesLabel">Categories</p>
+          <nav class="category-nav" id="categoryNav" aria-labelledby="categoriesLabel"></nav>
+
+          <label class="learned-filter">
+            <input type="checkbox" id="hideLearned">
+            <span>Hide learned points</span>
+          </label>
+
+          <button class="reset-progress" id="resetProgressButton" type="button">Reset learned points</button>
+        </aside>
+
+        <section class="point-browser" aria-labelledby="listHeading">
+          <div class="browser-head">
+            <h2 id="listHeading">All points</h2>
+            <span class="result-count" id="resultCount">434 points</span>
+          </div>
+
+          <div class="list-labels" id="listLabels" aria-hidden="true">
+            <span></span>
+            <span>Grammar point</span>
+            <span>Pattern</span>
+            <span>Learned</span>
+            <span></span>
+          </div>
+
+          <ol class="point-list" id="pointList"></ol>
+
+          <div class="empty-state" id="emptyState" hidden>
+            <p>No grammar points match these filters.</p>
+            <button class="text-button" id="clearFiltersButton" type="button">Clear filters</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="lessonView" hidden>
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="#/">All points</a>
+        <span aria-hidden="true">/</span>
+        <a id="breadcrumbLevel" href="#/">A1</a>
+        <span aria-hidden="true">/</span>
+        <a id="breadcrumbCategory" href="#/">Category</a>
+      </nav>
+
+      <article class="lesson">
+        <header class="lesson-header">
+          <div class="lesson-heading">
+            <p class="lesson-meta" id="lessonMeta"></p>
+            <h1 id="lessonTitle"></h1>
+          </div>
+          <button class="learn-button" id="learnButton" type="button" aria-pressed="false">Mark as learned</button>
+        </header>
+
+        <section class="pattern-block" aria-labelledby="patternHeading">
+          <h2 id="patternHeading">Pattern</h2>
+          <p class="pattern-hanzi" id="lessonPattern" lang="zh-Hans"></p>
+        </section>
+
+        <p class="lesson-summary" id="lessonSummary"></p>
+        <p class="lesson-detail" id="lessonDetail"></p>
+
+        <section class="lesson-section" aria-labelledby="examplesHeading">
+          <div class="examples-head">
+            <h2 id="examplesHeading">Examples</h2>
+            <button class="reveal-button" id="examplesToggle" type="button" aria-pressed="false" aria-controls="lessonExamples">Show pinyin &amp; translation</button>
+          </div>
+          <div class="example-list" id="lessonExamples"></div>
+        </section>
+
+        <p class="source-line">
+          <a id="lessonWiki" href="#" target="_blank" rel="noopener noreferrer">Read this point on the Chinese Grammar Wiki <span aria-hidden="true">↗</span></a>
+        </p>
+
+        <nav class="lesson-pagination" aria-label="Previous and next grammar point">
+          <a class="page-link previous" id="prevPoint" href="#/">
+            <span class="page-link-label">Previous</span>
+            <strong id="prevPointTitle"></strong>
+          </a>
+          <a class="page-link next" id="nextPoint" href="#/">
+            <span class="page-link-label">Next</span>
+            <strong id="nextPointTitle"></strong>
+          </a>
+        </nav>
+      </article>
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="data-a2.js"></script>
+  <script src="data-b1.js"></script>
+  <script src="data-b2.js"></script>
+  <script src="data-examples.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
