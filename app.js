@@ -64,11 +64,11 @@
     lessonMeta: document.getElementById("lessonMeta"),
     lessonTitle: document.getElementById("lessonTitle"),
     learnButton: document.getElementById("learnButton"),
+    learnButtonBottom: document.getElementById("learnButtonBottom"),
     lessonPattern: document.getElementById("lessonPattern"),
     lessonSummary: document.getElementById("lessonSummary"),
     lessonDetail: document.getElementById("lessonDetail"),
     lessonExamples: document.getElementById("lessonExamples"),
-    examplesToggle: document.getElementById("examplesToggle"),
     lessonWiki: document.getElementById("lessonWiki"),
     prevPoint: document.getElementById("prevPoint"),
     prevPointTitle: document.getElementById("prevPointTitle"),
@@ -82,8 +82,7 @@
     hideLearned: false,
     level: "all",
     category: "all",
-    currentPointId: null,
-    showSupport: false
+    currentPointId: null
   };
 
   function escapeHtml(value) {
@@ -302,12 +301,14 @@
 
   function updateLearnButton(pointId) {
     const isLearned = state.learned.has(pointId);
-    els.learnButton.classList.toggle("is-learned", isLearned);
-    els.learnButton.setAttribute("aria-pressed", String(isLearned));
-    els.learnButton.textContent = isLearned ? "✓ Learned" : "Mark as learned";
-    els.learnButton.title = isLearned
-      ? "Click to mark this point as not learned"
-      : "Mark this point as learned";
+    [els.learnButton, els.learnButtonBottom].forEach((button) => {
+      button.classList.toggle("is-learned", isLearned);
+      button.setAttribute("aria-pressed", String(isLearned));
+      button.textContent = isLearned ? "✓ Learned" : "Mark as learned";
+      button.title = isLearned
+        ? "Click to mark this point as not learned"
+        : "Mark this point as learned";
+    });
   }
 
   function setPageLink(link, label, point) {
@@ -345,18 +346,29 @@
     els.lessonDetail.hidden = !point.detail;
     els.lessonWiki.href = point.wiki;
 
-    state.showSupport = false;
-    els.lessonExamples.classList.remove("show-support");
-    els.examplesToggle.setAttribute("aria-pressed", "false");
-    els.examplesToggle.textContent = "Show pinyin & translation";
+    els.lessonExamples.innerHTML = point.examples.map((example, index) => {
+      const supportId = `example-support-${index + 1}`;
+      const hasSupport = Boolean(example.pinyin || example.en);
+      const hanzi = `<span class="example-hanzi" lang="zh-Hans">${escapeHtml(example.zh)}</span>`;
+      const support = hasSupport ? `
+        <span class="example-support" id="${supportId}">
+          ${example.pinyin ? `<span class="example-pinyin" lang="zh-Latn">${escapeHtml(example.pinyin)}</span>` : ""}
+          ${example.en ? `<span class="example-translation">${escapeHtml(example.en)}</span>` : ""}
+        </span>
+        <span class="example-chevron" aria-hidden="true"></span>
+      ` : "";
 
-    els.lessonExamples.innerHTML = point.examples.map((example) => `
-      <div class="example">
-        <p class="example-hanzi" lang="zh-Hans">${escapeHtml(example.zh)}</p>
-        ${example.pinyin ? `<p class="example-pinyin" lang="zh-Latn">${escapeHtml(example.pinyin)}</p>` : ""}
-        ${example.en ? `<p class="example-translation">${escapeHtml(example.en)}</p>` : ""}
-      </div>
-    `).join("");
+      if (!hasSupport) {
+        return `<div class="example">${hanzi}</div>`;
+      }
+
+      return `
+        <button class="example" type="button" aria-expanded="false" aria-controls="${supportId}">
+          ${hanzi}
+          ${support}
+        </button>
+      `;
+    }).join("");
 
     setPageLink(els.prevPoint, els.prevPointTitle, points[index - 1]);
     setPageLink(els.nextPoint, els.nextPointTitle, points[index + 1]);
@@ -481,27 +493,29 @@
       renderList();
     });
 
-    els.learnButton.addEventListener("click", () => {
-      if (!state.currentPointId) return;
+    [els.learnButton, els.learnButtonBottom].forEach((button) => {
+      button.addEventListener("click", () => {
+        if (!state.currentPointId) return;
 
-      if (state.learned.has(state.currentPointId)) {
-        state.learned.delete(state.currentPointId);
-      } else {
-        state.learned.add(state.currentPointId);
-      }
+        if (state.learned.has(state.currentPointId)) {
+          state.learned.delete(state.currentPointId);
+        } else {
+          state.learned.add(state.currentPointId);
+        }
 
-      saveLearned();
-      updateHeader();
-      updateLearnButton(state.currentPointId);
+        saveLearned();
+        updateHeader();
+        updateLearnButton(state.currentPointId);
+      });
     });
 
-    els.examplesToggle.addEventListener("click", () => {
-      state.showSupport = !state.showSupport;
-      els.lessonExamples.classList.toggle("show-support", state.showSupport);
-      els.examplesToggle.setAttribute("aria-pressed", String(state.showSupport));
-      els.examplesToggle.textContent = state.showSupport
-        ? "Hide pinyin & translation"
-        : "Show pinyin & translation";
+    els.lessonExamples.addEventListener("click", (event) => {
+      const example = event.target.closest("button.example");
+      if (!example) return;
+
+      const expanded = !example.classList.contains("is-revealed");
+      example.classList.toggle("is-revealed", expanded);
+      example.setAttribute("aria-expanded", String(expanded));
     });
 
     window.addEventListener("hashchange", renderRoute);

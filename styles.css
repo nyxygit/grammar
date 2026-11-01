@@ -420,6 +420,14 @@ a:hover {
   text-decoration: none;
 }
 
+.point-row.is-learned {
+  background: #f0fdf4;
+}
+
+.point-row.is-learned:hover {
+  background: #e8f8ed;
+}
+
 .point-row:focus-visible {
   outline-offset: -2px;
 }
@@ -623,44 +631,34 @@ a:hover {
   border-bottom: 1px solid var(--border);
 }
 
-.examples-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-}
-
-.examples-head h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.reveal-button {
-  flex: 0 0 auto;
-  padding: 5px 9px;
-  color: var(--text-secondary);
-  font-size: 12px;
-  background: #fff;
-  border: 1px solid var(--border-strong);
-  border-radius: 4px;
-}
-
-.reveal-button:hover {
-  color: var(--text);
-  background: var(--surface-subtle);
-}
-
-.reveal-button[aria-pressed="true"] {
-  color: var(--text);
-  background: var(--surface-subtle);
-}
-
 .example {
-  padding: 22px 0;
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 22px 26px 22px 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
   border-bottom: 1px solid var(--border);
+  border-radius: 0;
+}
+
+button.example {
+  cursor: pointer;
+}
+
+button.example:hover {
+  background: var(--surface-subtle);
+}
+
+button.example:active {
+  background: #f3f4f6;
+}
+
+button.example:focus-visible {
+  outline-offset: -2px;
 }
 
 .example:last-child {
@@ -669,6 +667,7 @@ a:hover {
 }
 
 .example-hanzi {
+  display: block;
   margin-bottom: 0;
   color: var(--text);
   font-family: var(--hanzi);
@@ -678,8 +677,12 @@ a:hover {
   letter-spacing: 0.01em;
 }
 
-.example-pinyin {
+.example-support {
   display: none;
+}
+
+.example-pinyin {
+  display: block;
   margin-bottom: 4px;
   color: var(--muted);
   font-size: 16px;
@@ -687,20 +690,43 @@ a:hover {
 }
 
 .example-translation {
-  display: none;
+  display: block;
   margin-bottom: 0;
   color: var(--text-secondary);
   font-size: 16px;
   line-height: 1.55;
 }
 
-.example-list.show-support .example-hanzi {
+.example.is-revealed .example-hanzi {
   margin-bottom: 8px;
 }
 
-.example-list.show-support .example-pinyin,
-.example-list.show-support .example-translation {
+.example.is-revealed .example-support {
   display: block;
+}
+
+.example-chevron {
+  position: absolute;
+  top: 45px;
+  right: 5px;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid #9ca3af;
+  border-bottom: 1.5px solid #9ca3af;
+  transform: rotate(45deg);
+  transition: transform 150ms ease;
+}
+
+.example.is-revealed .example-chevron {
+  transform: rotate(225deg);
+}
+
+.lesson-learn-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
 }
 
 .source-line {
@@ -982,15 +1008,17 @@ a:hover {
     font-size: 29px;
   }
 
-  .examples-head {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
+  .example-chevron {
+    top: 41px;
   }
 
   .example-pinyin,
   .example-translation {
     font-size: 15px;
+  }
+
+  .lesson-learn-footer .learn-button {
+    width: 100%;
   }
 
   .lesson-pagination {
