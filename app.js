@@ -47,6 +47,9 @@
     headerProgress: document.getElementById("headerProgress"),
     browseView: document.getElementById("browseView"),
     lessonView: document.getElementById("lessonView"),
+    reviewView: document.getElementById("reviewView"),
+    reviewButton: document.getElementById("reviewButton"),
+    reviewCount: document.getElementById("reviewCount"),
     levelNav: document.getElementById("levelNav"),
     categoryNav: document.getElementById("categoryNav"),
     searchInput: document.getElementById("searchInput"),
@@ -73,7 +76,29 @@
     prevPoint: document.getElementById("prevPoint"),
     prevPointTitle: document.getElementById("prevPointTitle"),
     nextPoint: document.getElementById("nextPoint"),
-    nextPointTitle: document.getElementById("nextPointTitle")
+    nextPointTitle: document.getElementById("nextPointTitle"),
+    reviewProgress: document.getElementById("reviewProgress"),
+    reviewCard: document.getElementById("reviewCard"),
+    reviewEmpty: document.getElementById("reviewEmpty"),
+    reviewInstruction: document.getElementById("reviewInstruction"),
+    reviewHanzi: document.getElementById("reviewHanzi"),
+    reviewActions: document.getElementById("reviewActions"),
+    knowButton: document.getElementById("knowButton"),
+    notKnowButton: document.getElementById("notKnowButton"),
+    reviewResult: document.getElementById("reviewResult"),
+    reviewPointLabel: document.getElementById("reviewPointLabel"),
+    reviewPointTitle: document.getElementById("reviewPointTitle"),
+    reviewPinyin: document.getElementById("reviewPinyin"),
+    reviewTranslation: document.getElementById("reviewTranslation"),
+    reviewRefresher: document.getElementById("reviewRefresher"),
+    reviewPattern: document.getElementById("reviewPattern"),
+    reviewSummary: document.getElementById("reviewSummary"),
+    reviewExtra: document.getElementById("reviewExtra"),
+    reviewExtraHanzi: document.getElementById("reviewExtraHanzi"),
+    reviewExtraPinyin: document.getElementById("reviewExtraPinyin"),
+    reviewExtraTranslation: document.getElementById("reviewExtraTranslation"),
+    reviewWiki: document.getElementById("reviewWiki"),
+    nextReviewButton: document.getElementById("nextReviewButton")
   };
 
   const state = {
@@ -83,6 +108,13 @@
     level: "all",
     category: "all",
     currentPointId: null
+  };
+
+  const reviewState = {
+    current: null,
+    reviewed: 0,
+    usedExamples: new Set(),
+    lastPointId: null
   };
 
   function escapeHtml(value) {
@@ -140,6 +172,8 @@
   function updateHeader() {
     els.headerProgress.textContent = `${state.learned.size} of ${points.length} learned`;
     els.resetProgressButton.disabled = state.learned.size === 0;
+    els.reviewButton.disabled = state.learned.size === 0;
+    els.reviewCount.textContent = String(state.learned.size);
   }
 
   function browseHref(level, category) {
@@ -296,6 +330,7 @@
 
     els.browseView.hidden = false;
     els.lessonView.hidden = true;
+    els.reviewView.hidden = true;
     state.currentPointId = null;
   }
 
@@ -378,11 +413,149 @@
 
     els.browseView.hidden = true;
     els.lessonView.hidden = false;
+    els.reviewView.hidden = true;
     return true;
+  }
+
+  function updateReviewProgress() {
+    const count = reviewState.reviewed;
+    els.reviewProgress.textContent = `${count} ${plural(count, "example")} reviewed`;
+  }
+
+  function chooseReviewExample() {
+    const learnedPoints = points.filter((point) => state.learned.has(point.id));
+    if (!learnedPoints.length) return null;
+
+    const allExamples = learnedPoints.flatMap((point) => point.examples.map((example, index) => ({
+      point,
+      example,
+      index,
+      key: `${point.id}:${index}`
+    })));
+
+    let available = allExamples.filter((candidate) => !reviewState.usedExamples.has(candidate.key));
+    if (!available.length) {
+      reviewState.usedExamples.clear();
+      available = allExamples;
+    }
+
+    const differentPoint = available.filter((candidate) => candidate.point.id !== reviewState.lastPointId);
+    const candidates = differentPoint.length ? differentPoint : available;
+    const current = candidates[Math.floor(Math.random() * candidates.length)];
+
+    reviewState.current = current;
+    reviewState.lastPointId = current.point.id;
+    reviewState.usedExamples.add(current.key);
+    return current;
+  }
+
+  function renderReviewExample() {
+    const current = reviewState.current;
+    if (!current) return;
+
+    els.reviewCard.hidden = false;
+    els.reviewEmpty.hidden = true;
+    els.reviewInstruction.textContent = "Read the sentence. Do you understand it?";
+    els.reviewHanzi.textContent = current.example.zh;
+    els.reviewActions.hidden = false;
+    els.reviewResult.hidden = true;
+    els.reviewRefresher.hidden = true;
+    els.knowButton.disabled = false;
+    els.notKnowButton.disabled = false;
+    els.nextReviewButton.textContent = "Next example";
+  }
+
+  function renderReview() {
+    els.browseView.hidden = true;
+    els.lessonView.hidden = true;
+    els.reviewView.hidden = false;
+    document.title = "Review learned · Chinese Grammar";
+
+    if (!state.learned.size) {
+      reviewState.current = null;
+      reviewState.reviewed = 0;
+      reviewState.usedExamples.clear();
+      reviewState.lastPointId = null;
+      els.reviewCard.hidden = true;
+      els.reviewEmpty.hidden = false;
+      updateReviewProgress();
+      return;
+    }
+
+    els.reviewEmpty.hidden = true;
+
+    if (!reviewState.current || !state.learned.has(reviewState.current.point.id)) {
+      chooseReviewExample();
+    }
+
+    renderReviewExample();
+  }
+
+  function gradeReview(understood) {
+    const current = reviewState.current;
+    if (!current || !els.reviewResult.hidden) return;
+
+    const { point, example, index } = current;
+    const category = categoryById.get(point.category);
+
+    reviewState.reviewed += 1;
+    updateReviewProgress();
+
+    els.reviewActions.hidden = true;
+    els.reviewResult.hidden = false;
+    els.reviewInstruction.textContent = understood
+      ? "Here's how that sentence reads."
+      : "Let's review this grammar point.";
+    els.reviewPointLabel.textContent = `${point.level} · ${category ? category.name : ""}`;
+    els.reviewPointTitle.textContent = point.title;
+    els.reviewPinyin.textContent = example.pinyin || "";
+    els.reviewPinyin.hidden = !example.pinyin;
+    els.reviewTranslation.textContent = example.en || "";
+    els.reviewTranslation.hidden = !example.en;
+    els.reviewRefresher.hidden = understood;
+    els.nextReviewButton.textContent = understood ? "Next example" : "Try another example";
+
+    if (!understood) {
+      els.reviewPattern.textContent = point.pattern;
+      els.reviewSummary.textContent = point.summary || "";
+      els.reviewWiki.href = point.wiki;
+
+      const otherExamples = point.examples
+        .map((item, itemIndex) => ({ item, itemIndex }))
+        .filter(({ itemIndex }) => itemIndex !== index);
+      const extra = otherExamples.length
+        ? otherExamples[Math.floor(Math.random() * otherExamples.length)].item
+        : null;
+
+      if (extra) {
+        els.reviewExtra.hidden = false;
+        els.reviewExtraHanzi.textContent = extra.zh;
+        els.reviewExtraPinyin.textContent = extra.pinyin || "";
+        els.reviewExtraPinyin.hidden = !extra.pinyin;
+        els.reviewExtraTranslation.textContent = extra.en || "";
+        els.reviewExtraTranslation.hidden = !extra.en;
+      } else {
+        els.reviewExtra.hidden = true;
+      }
+    }
+  }
+
+  function nextReviewExample() {
+    if (!state.learned.size) {
+      renderReview();
+      return;
+    }
+    chooseReviewExample();
+    renderReviewExample();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function parseRoute() {
     const raw = window.location.hash.replace(/^#\/?/, "").replace(/\/+$/, "");
+
+    if (raw === "review") {
+      return { view: "review" };
+    }
 
     if (raw.startsWith("point/")) {
       return {
@@ -411,7 +584,9 @@
   function renderRoute() {
     const route = parseRoute();
 
-    if (route.view === "lesson") {
+    if (route.view === "review") {
+      renderReview();
+    } else if (route.view === "lesson") {
       if (pointById.has(route.pointId)) {
         renderLesson(route.pointId);
       } else {
@@ -488,8 +663,13 @@
       if (!confirmed) return;
 
       state.learned.clear();
+      reviewState.current = null;
+      reviewState.reviewed = 0;
+      reviewState.usedExamples.clear();
+      reviewState.lastPointId = null;
       saveLearned();
       updateHeader();
+      updateReviewProgress();
       renderList();
     });
 
@@ -518,6 +698,14 @@
       example.setAttribute("aria-expanded", String(expanded));
     });
 
+    els.reviewButton.addEventListener("click", () => {
+      window.location.hash = "#/review";
+    });
+
+    els.knowButton.addEventListener("click", () => gradeReview(true));
+    els.notKnowButton.addEventListener("click", () => gradeReview(false));
+    els.nextReviewButton.addEventListener("click", nextReviewExample);
+
     window.addEventListener("hashchange", renderRoute);
 
     document.addEventListener("keydown", (event) => {
@@ -540,6 +728,7 @@
     const hash = window.location.hash;
     const validHash = !hash
       || hash === "#/"
+      || hash === "#/review"
       || /^#\/?point\//.test(hash)
       || /^#\/?category\//.test(hash)
       || /^#\/?level\/(a1|a2|b1|b2)(\/category\/[^/]+)?\/?$/i.test(hash);

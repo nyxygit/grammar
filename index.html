@@ -21,10 +21,16 @@
 
   <main class="page">
     <section id="browseView">
-      <header class="page-heading">
-        <h1 id="browseTitle">A1–B2 grammar points</h1>
-        <p>Browse the complete A1–B2 grammar syllabus from the Chinese Grammar Wiki. Select a point to read its pattern, explanation, and examples.</p>
-      </header>
+      <div class="page-heading-row">
+        <header class="page-heading">
+          <h1 id="browseTitle">A1–B2 grammar points</h1>
+          <p>Browse the complete A1–B2 grammar syllabus from the Chinese Grammar Wiki. Select a point to read its pattern, explanation, and examples.</p>
+        </header>
+        <button class="review-launch" id="reviewButton" type="button" disabled>
+          <span>Review learned</span>
+          <span class="review-count" id="reviewCount">0</span>
+        </button>
+      </div>
 
       <div class="browse-layout">
         <aside class="filters" aria-label="Browse filters">
@@ -128,6 +134,52 @@
           </a>
         </nav>
       </article>
+    </section>
+
+    <section id="reviewView" hidden>
+      <div class="review-topbar">
+        <a class="text-button" href="#/">← Back to library</a>
+        <span class="review-progress" id="reviewProgress">0 examples reviewed</span>
+      </div>
+
+      <section class="review-card" id="reviewCard" aria-live="polite">
+        <p class="review-instruction" id="reviewInstruction">Read the sentence. Do you understand it?</p>
+        <p class="review-hanzi" id="reviewHanzi" lang="zh-Hans"></p>
+
+        <div class="review-actions" id="reviewActions">
+          <button class="grade-button know" id="knowButton" type="button" lang="zh-Hans" aria-label="懂了 — I understand">懂了</button>
+          <button class="grade-button dont-know" id="notKnowButton" type="button" lang="zh-Hans" aria-label="没懂 — I do not understand">没懂</button>
+        </div>
+
+        <div class="review-result" id="reviewResult" hidden>
+          <p class="review-point-label" id="reviewPointLabel"></p>
+          <h2 class="review-point-title" id="reviewPointTitle"></h2>
+          <p class="review-pinyin" id="reviewPinyin" lang="zh-Latn"></p>
+          <p class="review-translation" id="reviewTranslation"></p>
+
+          <div class="review-refresher" id="reviewRefresher" hidden>
+            <p class="review-label">Refresher</p>
+            <p class="review-pattern" id="reviewPattern" lang="zh-Hans"></p>
+            <p class="review-summary" id="reviewSummary"></p>
+            <div class="review-extra" id="reviewExtra">
+              <p class="review-label">Another example</p>
+              <p class="review-extra-hanzi" id="reviewExtraHanzi" lang="zh-Hans"></p>
+              <p class="review-extra-pinyin" id="reviewExtraPinyin" lang="zh-Latn"></p>
+              <p class="review-extra-translation" id="reviewExtraTranslation"></p>
+            </div>
+            <a class="review-wiki" id="reviewWiki" href="#" target="_blank" rel="noopener noreferrer">Open full lesson <span aria-hidden="true">↗</span></a>
+          </div>
+
+          <div class="review-next-row">
+            <button class="learn-button" id="nextReviewButton" type="button">Next example</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="review-empty" id="reviewEmpty" hidden>
+        <p>No learned points yet. Mark a few points as learned to start reviewing.</p>
+        <a class="text-button" href="#/">Back to the grammar library</a>
+      </div>
     </section>
   </main>
 
